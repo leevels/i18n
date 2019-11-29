@@ -20,39 +20,39 @@ declare(strict_types=1);
 
 namespace Leevel\I18n;
 
-use Gettext\Translations;
+use function Leevel\Support\Str\un_camelize;
+use Leevel\Support\Str\un_camelize;
 
 /**
- * 解析 po 文件.
+ * 助手类.
  *
  * @author Xiangmin Liu <635750556@qq.com>
  *
- * @since 2017.09.18
+ * @since 2019.08.21
  *
  * @version 1.0
  */
-class Po implements IGettext
+class Helper
 {
     /**
-     * 读取文件数据.
+     * call.
      *
-     * @param array $filenames
+     * @param string $method
+     * @param array  $args
      *
-     * @return array
+     * @return mixed
      */
-    public function read(array $filenames): array
+    public static function __callStatic(string $method, array $args)
     {
-        $translations = new Translations();
-        foreach ($filenames as $val) {
-            $translations->addFromPoFile($val);
+        $fn = __NAMESPACE__.'\\Helper\\'.un_camelize($method);
+
+        if (!function_exists($fn)) {
+            class_exists($fn);
         }
 
-        $result = json_decode($translations->toJsonString(), true);
-        $result = $result['messages'][''] ?? [];
-        $result = array_map(function ($item) {
-            return $item[0];
-        }, $result);
-
-        return $result;
+        return $fn(...$args);
     }
 }
+
+// import fn.
+class_exists(un_camelize::class);
